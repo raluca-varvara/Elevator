@@ -1,0 +1,45 @@
+library IEEE;
+
+use IEEE.STD_LOGIC_1164.all;
+
+entity bcd7seg2 is 
+	port (etaj : in std_logic_vector (3 downto 0);
+	Seven_Segment: out std_logic_vector (6 downto 0));
+end bcd7seg2;
+
+architecture comportamental of bcd7seg2 is
+begin
+	process(etaj)
+	begin
+		case etaj is
+			when "0000" => 
+				Seven_Segment <= "1111111"; ---parter
+			when "0001" =>
+				Seven_Segment <= "1111111"; ---etaj 1
+			when "0010" =>
+				Seven_Segment <= "1111111"; ---etaj 2
+			when "0011" =>
+				Seven_Segment <= "1111111"; ---etaj 3
+			when "0100" =>
+				Seven_Segment <= "1111111"; ---etaj 4
+			when "0101" =>
+				Seven_Segment <= "1111111"; ---etaj 5
+			when "0110" =>
+				Seven_Segment <= "1111111"; ---etaj 6
+			when "0111" =>
+				Seven_Segment <= "1111111"; ---etaj 7
+			when "1000" =>
+				Seven_Segment <= "1111111"; ---etaj 8
+			when "1001" =>
+				Seven_Segment <= "1111111"; ---etaj 9
+			when "1010" =>
+				Seven_Segment <= "1001111"; ---etaj 10
+			when "1011" =>
+				Seven_Segment <= "1001111"; ---etaj 11
+			when "1100" =>
+				Seven_Segment <= "1001111"; ---etaj 12
+			when others =>
+			Seven_segment <= "1111111"; ---bezna
+		end case;
+	end process;
+end comportamental;

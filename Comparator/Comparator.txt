@@ -1,0 +1,40 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity comparator is
+	port(etaj_curent: in std_logic_vector(3 downto 0);
+		etaj_ales: in std_logic_vector(3 downto 0);
+		br: in std_logic;
+		stationare: out std_logic := '1';	
+		sens_sus: out std_logic := '1';
+		sens_jos: out std_logic := '0';
+		ajuns: out std_logic);
+
+end entity;
+
+architecture behaviorial of comparator is
+begin	
+	process(etaj_curent, etaj_ales, br)
+		variable s: std_logic := '1';	
+		begin		
+			if (etaj_curent = etaj_ales) then
+				ajuns <= '1';
+				s := '1';
+			else
+				ajuns <= '0';
+				if (br = '1') then
+					s := '0';
+				end if;
+				if (etaj_curent > etaj_ales) then
+					sens_sus <= '0';
+					sens_jos <= '1';
+				elsif (etaj_curent < etaj_ales) then
+					sens_sus <= '1';
+					sens_jos <= '0';
+				end if;
+			end if;	
+			stationare <= s;
+	end process;
+end architecture;

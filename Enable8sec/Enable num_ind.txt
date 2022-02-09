@@ -1,0 +1,17 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity e_8sec is
+	port (gm : in std_logic;
+	pu : in std_logic;
+	stationare : in std_logic;
+	mem_goala : in std_logic;
+	permisie : out std_logic);
+end entity;
+
+architecture flux of e_8sec is
+begin
+	permisie <= not gm and not pu and not mem_goala and stationare;
+end architecture;

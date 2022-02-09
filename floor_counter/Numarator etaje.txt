@@ -1,0 +1,39 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity counter4bit is
+	port (clock: in std_logic;
+	enable: in std_logic := '1';
+	sens: in std_logic := '0'; -- sus:0 jos:1
+	output: out std_logic_vector (3 downto 0));
+end entity;
+
+architecture comportamental of counter4bit is
+begin
+	process (clock, sens, enable)
+	variable etaj: std_logic_vector(3 downto 0) := "0000";
+	begin
+		if (rising_edge(clock)) then
+			if enable = '0' then
+				if sens = '0' then
+					if etaj = "1100" then
+						etaj := "1100";
+					else
+						etaj := etaj + '1';
+					end if;
+				else
+					if etaj = "0000" then
+						etaj := "0000";
+					else
+						etaj := etaj - '1';
+					end if;
+				end if;
+			else
+				etaj := etaj;
+			end if;
+		end if;
+		output <= etaj;
+	end process;
+end architecture;

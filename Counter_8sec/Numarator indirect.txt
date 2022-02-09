@@ -1,0 +1,29 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity num_indirect is
+	port (clk: in std_logic;
+	enable: in std_logic;
+	br : out std_logic := '0');
+end entity;
+
+architecture comportamental of num_indirect is
+begin
+	process(clk, enable)
+	variable sec: std_logic_vector (2 downto 0) := "111";
+	begin
+		if (rising_edge(clk)) then
+			if enable = '1' then
+				if sec = "000" then
+					sec := "111";
+					br <= '1';
+				else
+					sec := sec - '1';
+					br <= '0';
+				end if;
+			end if;
+		end if;
+	end process;
+end architecture;

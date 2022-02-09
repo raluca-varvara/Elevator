@@ -1,0 +1,95 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity lift is
+	port (clk : in std_logic;
+	etaj_comanda : in std_logic_vector (3 downto 0);
+	int : in std_logic;
+	ext : in std_logic;
+	up : in std_logic;
+	down : in std_logic;
+	ok : in std_logic;
+	pu : in std_logic;
+	gm : in std_logic;
+	su : out std_logic;
+	afisor1 : out std_logic_vector (6 downto 0);
+	afisor2 : out std_logic_vector (6 downto 0));
+end entity;
+
+architecture structural of lift is
+	component e_8sec is
+		port (gm : in std_logic;
+		pu : in std_logic;
+		stationare : in std_logic;
+		mem_goala : in std_logic;
+		permisie : out std_logic);
+	end component;
+	
+	component alegere_etaj is
+		port (clk: in std_logic;
+		etaj_curent: in std_logic_vector (3 downto 0) := "0000";
+		etaj_comanda: in std_logic_vector (3 downto 0);
+		int, ext, up, down: in std_logic; --- up down ext int
+		ok: in std_logic;
+		egal: in std_logic;
+		sens_jos: in std_logic;
+		sens_sus: in std_logic;
+		mem_goala: out std_logic := '1';
+		etaj_urmator: out std_logic_vector (3 downto 0) := "0000");
+	end component;
+	
+	component num_indirect is
+		port (clk: in std_logic;
+		enable: in std_logic; --merge pe 1
+		br : out std_logic := '0');
+	end component;
+	
+	component counter4bit is
+		port (clock: in std_logic;
+		enable: in std_logic := '1'; --merge pe 0
+		sens: in std_logic := '0'; -- sus:0 jos:1
+		output: out std_logic_vector (3 downto 0));
+	end component;
+	
+	component bcd7seg2 is 
+		port (etaj : in std_logic_vector (3 downto 0);
+		Seven_Segment: out std_logic_vector (6 downto 0));
+	end component;
+
+	component bcd7seg1 is 
+		port (etaj : in std_logic_vector (3 downto 0);
+		Seven_Segment: out std_logic_vector (6 downto 0));
+	end component;
+
+	component comparator is
+		port(etaj_curent: in std_logic_vector(3 downto 0);
+		etaj_ales: in std_logic_vector(3 downto 0);
+		br: in std_logic;
+		stationare: out std_logic := '1';	
+		sens_sus: out std_logic := '1';
+		sens_jos: out std_logic := '0';
+		ajuns : out std_logic);
+	end component; 
+	
+	signal pornire : std_logic := '0'; --enable num.8sec = permisie
+	signal caut_sus : std_logic := '1';	--sens sus
+	signal caut_jos : std_logic := '0';	--sens jos
+	signal sosire : std_logic := '1'; --enable num. etaj = stationare
+	signal next_lvl : std_logic_vector (3 downto 0) := "0000"; --etaj urmator
+	signal curr_lvl	: std_logic_vector (3 downto 0) := "0000"; --etaj curent
+	signal terminat : std_logic := '0';	--br
+	signal nimic : std_logic := '1'; --memorie goala
+	signal egale : std_logic := '1'; --ajuns 
+	
+	begin
+		NI : num_indirect port map (clk, pornire, terminat);
+		NE : counter4bit port map (clk, sosire, caut_jos, curr_lvl);
+		AF1 : bcd7seg1 port map (curr_lvl, afisor1);
+		AF2 : bcd7seg2 port map	(curr_lvl, afisor2);
+		E8S : e_8sec port map (gm, pu, sosire, nimic, pornire);
+		COM : comparator port map (curr_lvl, next_lvl, terminat, sosire, caut_sus, caut_jos, egale);
+		NLVL : alegere_etaj port map (clk, curr_lvl, etaj_comanda, int, ext, up, down, ok, egale, caut_jos, caut_sus, nimic, next_lvl);
+		su <= sosire;
+end architecture structural;

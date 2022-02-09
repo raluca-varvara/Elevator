@@ -1,0 +1,143 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity alegere_etaj is
+	port (clk: in std_logic;
+	etaj_curent: in std_logic_vector (3 downto 0) := "0000";
+	etaj_comanda: in std_logic_vector (3 downto 0);
+	int, ext, up, down: in std_logic; --- up down ext int
+	ok: in std_logic;
+	egal: in std_logic;
+	
+	sens_jos: in std_logic;
+	sens_sus: in std_logic;
+	mem_goala: out std_logic := '1';
+	etaj_urmator: out std_logic_vector (3 downto 0) := "0000");
+end entity;
+
+architecture comportamental of alegere_etaj is
+type mem is array(0 to 15) of std_logic_vector(3 downto 0);
+signal RAM: mem :=
+(x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0",x"0");
+begin
+	process (clk, ok, etaj_curent, sens_jos, sens_sus)
+	variable i: integer;
+	variable j: integer;
+	variable goala: std_logic := '1';
+	variable AUX: mem := RAM;
+	variable etaj : std_logic_vector (3 downto 0) := "0000";
+	begin
+		if (rising_edge(clk)) then
+			if (egal = '1') then
+				RAM (conv_integer(etaj_curent)) <= "0000";
+				AUX (conv_integer(etaj_curent)) := "0000";
+			end if;
+			if (ok = '1') then
+				if (up = '1') then
+					RAM (conv_integer(etaj_comanda))(3) <= '1';
+					RAM (conv_integer(etaj_comanda))(1) <= '1';
+					AUX (conv_integer(etaj_comanda))(3) := '1';
+					AUX (conv_integer(etaj_comanda))(1) := '1';
+				end if;
+				if (down = '1') then
+					RAM (conv_integer(etaj_comanda))(2) <= '1';
+					RAM (conv_integer(etaj_comanda))(1) <= '1';
+					AUX (conv_integer(etaj_comanda))(2) := '1';
+					AUX (conv_integer(etaj_comanda))(1) := '1';
+				end if;
+				if (int = '1') then
+					RAM (conv_integer(etaj_comanda))(0) <= '1';
+					AUX (conv_integer(etaj_comanda))(0) := '1';
+				end if;
+			end if;	 
+			
+			i := 0;
+			while (i < 13) loop
+				if (AUX(i) /= "0000") then
+					exit;
+				end if;
+				i := i + 1;
+			end loop;
+			
+			if (i = 13) then
+				goala := '1';
+			else
+				goala := '0';
+			end if;
+		  	
+			if (sens_sus = '1') then
+				i := conv_integer(etaj_curent);
+				while (i < 13) loop
+					if (AUX(i)(3) /= '0' or AUX(i)(0) /= '0') then
+						exit;
+					end if;
+					i := i + 1;
+				end loop;
+				if (i /= 13) then
+					etaj := conv_std_logic_vector(i, 4);
+				else
+					i := conv_integer(etaj_curent);
+					j := conv_integer(etaj_curent);
+					while (i >= 0) loop
+						if (AUX(i)(0) /= '0' or AUX(i)(2) /= '0') then
+							exit;
+						end if;
+						i := i - 1;
+					end loop;
+					while (j < 13) loop
+						if (AUX(j)(0) /= '0' or AUX(j)(2) /= '0') then
+							exit;
+						end if;
+						j := j + 1;
+					end loop;
+					if (j /= 13) then
+						etaj := conv_std_logic_vector(j, 4);
+					elsif (i /= -1) then 
+						etaj := conv_std_logic_vector(i, 4);
+					end if;
+				end if;
+			elsif (sens_jos = '1') then
+				i := conv_integer(etaj_curent);
+				while (i >= 0) loop
+					if (AUX(i)(2) /= '0' or AUX(i)(0) /= '0') then
+						exit;
+					end if;
+					i := i - 1;
+				end loop;
+				if (i /= -1) then
+					etaj := conv_std_logic_vector(i, 4);
+				else
+					i := conv_integer(etaj_curent);
+					j := conv_integer(etaj_curent);
+					while (i < 13) loop
+						if (AUX(i)(0) /= '0' or AUX(i)(3) /= '0') then
+							exit;
+						end if;
+						i := i + 1;
+					end loop;
+					while (j >= 0) loop
+						if (AUX(j)(0) /= '0' or AUX(j)(3) /= '0') then
+							exit;
+						end if;
+						j := j - 1;
+					end loop;
+					if (j /= -1) then 
+						etaj := conv_std_logic_vector(j, 4);
+					elsif (i /= 13) then 
+						etaj := conv_std_logic_vector(i, 4);
+					end if;	
+				end if;
+			end if;
+			
+			if (goala = '0') then
+				etaj_urmator <= etaj;
+			else
+				etaj_urmator <= etaj_curent;
+			end if;
+													 
+			mem_goala <= goala;
+		end if;
+	end process;
+end architecture;

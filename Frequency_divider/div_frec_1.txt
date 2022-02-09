@@ -1,0 +1,26 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+
+entity div_de_frecv1 is
+	port(clk: in std_logic;
+	clk_out: out std_logic);
+end entity;
+
+architecture comportamental of div_de_frecv1 is
+
+signal count: integer := 1;
+signal temp: std_logic := '0';
+
+begin
+	process(clk)
+	begin
+		if(rising_edge(clk)) then
+			count <= count+1;
+		end if;
+		if(count = 25000) then
+			count <= 1;
+			temp <= not temp;
+		end if;
+		clk_out <= temp;
+	end process;
+end architecture;
